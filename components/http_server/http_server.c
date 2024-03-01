@@ -21,13 +21,16 @@
 
 static const char *TAG = "example";
 
-static const char *HTML_FORM = "<html><form action=\"/\" method=\"post\">"
-                               "<label for=\"ssid\">Local SSID:</label><br>"
-                               "<input type=\"text\" id=\"ssid\" name=\"ssid\"><br>"
-                               "<label for=\"pwd\">Password:</label><br>"
-                               "<input type=\"text\" id=\"pwd\" name=\"pwd\"><br>"
-                               "<input type=\"submit\" value=\"Submit\">"
-                               "</form></html>";
+static const char *HTML_FORM = \
+"<html>\
+    <form action=\"/\" method=\"post\">"\
+        "<label for=\"ssid\">Local SSID:</label><br>"\
+        "<input type=\"text\" id=\"ssid\" name=\"ssid\"><br>"\
+        "<label for=\"pwd\">Password:</label><br>"\
+        "<input type=\"text\" id=\"pwd\" name=\"pwd\"><br>"\
+        "<input type=\"submit\" value=\"Submit\">"\
+    "</form>\
+</html>";
 
 /* An HTTP GET handler */
 static esp_err_t root_get_handler(httpd_req_t *req)
@@ -168,7 +171,7 @@ static esp_err_t echo_post_handler(httpd_req_t *req)
 }
 
 static const httpd_uri_t echo = {
-    .uri       = "/echo",
+    .uri       = "/",
     .method    = HTTP_POST,
     .handler   = echo_post_handler,
     .user_ctx  = NULL
