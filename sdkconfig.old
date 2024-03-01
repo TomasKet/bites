@@ -339,13 +339,8 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# Example Configuration
+# Bites Configuration
 #
-CONFIG_SNTP_TIME_SERVER="pool.ntp.org"
-CONFIG_SNTP_TIME_SYNC_METHOD_IMMED=y
-# CONFIG_SNTP_TIME_SYNC_METHOD_SMOOTH is not set
-# CONFIG_SNTP_TIME_SYNC_METHOD_CUSTOM is not set
-# end of Example Configuration
 
 #
 # Example Connection Configuration
@@ -382,12 +377,23 @@ CONFIG_EXAMPLE_WIFI_CONNECT_AP_BY_SIGNAL=y
 # CONFIG_EXAMPLE_WIFI_CONNECT_AP_BY_SECURITY is not set
 # CONFIG_EXAMPLE_CONNECT_ETHERNET is not set
 CONFIG_EXAMPLE_CONNECT_IPV4=y
-CONFIG_EXAMPLE_CONNECT_IPV6=y
-CONFIG_EXAMPLE_CONNECT_IPV6_PREF_LOCAL_LINK=y
-# CONFIG_EXAMPLE_CONNECT_IPV6_PREF_GLOBAL is not set
-# CONFIG_EXAMPLE_CONNECT_IPV6_PREF_SITE_LOCAL is not set
-# CONFIG_EXAMPLE_CONNECT_IPV6_PREF_UNIQUE_LOCAL is not set
+# CONFIG_EXAMPLE_CONNECT_IPV6 is not set
 # end of Example Connection Configuration
+
+#
+# Example Configuration
+#
+# CONFIG_EXAMPLE_ENABLE_HTTPS_USER_CALLBACK is not set
+# end of Example Configuration
+
+#
+# Wifi Configuration
+#
+CONFIG_ESP_WIFI_SSID="myssid"
+CONFIG_ESP_WIFI_PASSWORD="mypassword"
+CONFIG_ESP_WIFI_CHANNEL=1
+CONFIG_ESP_MAX_STA_CONN=4
+# end of Wifi Configuration
 
 #
 # Compiler options

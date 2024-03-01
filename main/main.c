@@ -14,6 +14,7 @@
 #include "driver/gpio.h"
 
 #include "wifi.h"
+#include "http_server.h"
 
 static const char *TAG = "example";
 
@@ -42,7 +43,11 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
     wifi_init_softap();
+    http_server_init();
     // sntp_process();
 }
 
@@ -111,9 +116,6 @@ static void sntp_process(void)
 
 static void obtain_time(void)
 {
-    ESP_ERROR_CHECK( nvs_flash_init() );
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK( esp_event_loop_create_default() );
 
     ESP_ERROR_CHECK(example_connect());
 
