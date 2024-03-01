@@ -103,7 +103,7 @@ static void obtain_time(void)
 
     ESP_LOGI(TAG, "Initializing and starting SNTP");
 
-    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(CONFIG_SNTP_TIME_SERVER);
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
 
     config.sync_cb = time_sync_notification_cb;
 
