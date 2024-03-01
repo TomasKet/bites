@@ -13,6 +13,8 @@
 #include "esp_sntp.h"
 #include "driver/gpio.h"
 
+#include "wifi.h"
+
 static const char *TAG = "example";
 
 #ifndef INET6_ADDRSTRLEN
@@ -23,6 +25,7 @@ static const char *TAG = "example";
 #define SECONDS_IN_HOUR 3600
 
 static void obtain_time(void);
+static void sntp_process(void);
 
 void time_sync_notification_cb(struct timeval *tv)
 {
@@ -31,6 +34,19 @@ void time_sync_notification_cb(struct timeval *tv)
 #define PIN_GPIO 5
 
 void app_main(void)
+{
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    wifi_init_softap();
+    // sntp_process();
+}
+
+static void sntp_process(void)
 {
     gpio_reset_pin(PIN_GPIO);
     gpio_set_direction(PIN_GPIO, GPIO_MODE_OUTPUT);
@@ -62,7 +78,7 @@ void app_main(void)
     const int minutes_end = 50;
 
     time_t start_time = hours_start * 3600 + minutes_start * 60;
-    time_t end_time = hours_end * 3600 + minutes_end * 60;    
+    time_t end_time = hours_end * 3600 + minutes_end * 60;
 
     time_t time_day = timeinfo.tm_hour * 3600 + timeinfo.tm_min * 60 + timeinfo.tm_sec;
     ESP_LOGI(TAG, "time_day %d", (int)(time_day));
