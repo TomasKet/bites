@@ -13,7 +13,7 @@
 #include "esp_sntp.h"
 #include "driver/gpio.h"
 
-#include "wifi.h"
+#include "wifi_ap.h"
 #include "http_server.h"
 
 static const char *TAG = "example";
