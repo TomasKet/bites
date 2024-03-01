@@ -10,6 +10,8 @@
 #include "esp_tls.h"
 #include "sdkconfig.h"
 
+#include <string.h>
+
 #include "http_server.h"
 
 static const char *TAG = "http_server";
@@ -43,7 +45,7 @@ static const httpd_uri_t root = {
 /* An HTTP POST handler */
 static esp_err_t echo_post_handler(httpd_req_t *req)
 {
-    char buf[100];
+    char buf[100] = { 0 };
     int ret, remaining = req->content_len;
 
     while (remaining > 0) {
@@ -57,14 +59,28 @@ static esp_err_t echo_post_handler(httpd_req_t *req)
             return ESP_FAIL;
         }
 
-        /* Send back the same data */
-        httpd_resp_send_chunk(req, buf, ret);
         remaining -= ret;
 
         /* Log data received */
         ESP_LOGI(TAG, "=========== RECEIVED DATA ==========");
         ESP_LOGI(TAG, "%.*s", ret, buf);
         ESP_LOGI(TAG, "====================================");
+
+        char ssid[32];
+        char password[32];
+
+        char *token;
+
+        token = strtok(buf, "&");
+        while (token != NULL) {
+            if (strstr(token, "ssid=")) {
+                strncpy(ssid, token + strlen("ssid="), 32);
+            }
+            if (strstr(token, "pwd="))
+                strncpy(password, token + strlen("pwd="), 32);
+
+            token = strtok(NULL, "&");
+        }
     }
 
     // End response
