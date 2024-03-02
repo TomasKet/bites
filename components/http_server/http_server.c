@@ -4,7 +4,7 @@
 #include <esp_system.h>
 #include <sys/param.h>
 #include "esp_netif.h"
-#include "esp_eth.h"
+#include "nvs_flash.h"
 
 #include "esp_https_server.h"
 #include "esp_tls.h"
@@ -21,11 +21,13 @@ static const char *HTML_FORM = \
     <form action=\"/\" method=\"post\">"\
         "<label for=\"ssid\">Local SSID:</label><br>"\
         "<input type=\"text\" id=\"ssid\" name=\"ssid\"><br>"\
-        "<label for=\"pwd\">Password:</label><br>"\
-        "<input type=\"text\" id=\"pwd\" name=\"pwd\"><br>"\
+        "<label for=\"pass\">Password:</label><br>"\
+        "<input type=\"text\" id=\"pass\" name=\"pass\"><br>"\
         "<input type=\"submit\" value=\"Submit\">"\
     "</form>\
 </html>";
+
+static int save_params(char *buff);
 
 /* An HTTP GET handler */
 static esp_err_t root_get_handler(httpd_req_t *req)
@@ -45,7 +47,7 @@ static const httpd_uri_t root = {
 /* An HTTP POST handler */
 static esp_err_t echo_post_handler(httpd_req_t *req)
 {
-    char buf[100] = { 0 };
+    char buf[256] = { 0 };
     int ret, remaining = req->content_len;
 
     while (remaining > 0) {
@@ -66,21 +68,8 @@ static esp_err_t echo_post_handler(httpd_req_t *req)
         ESP_LOGI(TAG, "%.*s", ret, buf);
         ESP_LOGI(TAG, "====================================");
 
-        char ssid[32];
-        char password[32];
-
-        char *token;
-
-        token = strtok(buf, "&");
-        while (token != NULL) {
-            if (strstr(token, "ssid=")) {
-                strncpy(ssid, token + strlen("ssid="), 32);
-            }
-            if (strstr(token, "pwd="))
-                strncpy(password, token + strlen("pwd="), 32);
-
-            token = strtok(NULL, "&");
-        }
+        if (save_params(buf))
+            ESP_LOGE(TAG, "save params failed");
     }
 
     // End response
@@ -127,24 +116,6 @@ static httpd_handle_t start_webserver(void)
     return server;
 }
 
-static esp_err_t stop_webserver(httpd_handle_t server)
-{
-    return httpd_ssl_stop(server);
-}
-
-static void disconnect_handler(void* arg, esp_event_base_t event_base,
-                               int32_t event_id, void* event_data)
-{
-    httpd_handle_t* server = (httpd_handle_t*) arg;
-    if (*server) {
-        if (stop_webserver(*server) == ESP_OK) {
-            *server = NULL;
-        } else {
-            ESP_LOGE(TAG, "Failed to stop https server");
-        }
-    }
-}
-
 static void connect_handler(void* arg, esp_event_base_t event_base,
                             int32_t event_id, void* event_data)
 {
@@ -156,8 +127,33 @@ static void connect_handler(void* arg, esp_event_base_t event_base,
 
 void http_server_init(void)
 {
-    static httpd_handle_t server = NULL;
+    static httpd_handle_t server;
+    server =  start_webserver();
 
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &connect_handler, &server));
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnect_handler, &server));
+}
+
+static int save_params(char *buff)
+{
+    nvs_handle_t my_handle;
+    if (nvs_open("storage", NVS_READWRITE, &my_handle) != ESP_OK)
+        return -1;
+
+    char *token;
+    token = strtok(buff, "&");
+    while (token != NULL) {
+        if (strstr(token, "ssid="))
+            if (nvs_set_str(my_handle, "wifi_ssid", token + strlen("ssid=")) != ESP_OK)
+                return -1;
+        if (strstr(token, "pass="))
+            if (nvs_set_str(my_handle, "wifi_password", token + strlen("pass=")) != ESP_OK)
+                return -1;
+
+        token = strtok(NULL, "&");
+    }
+
+    if (nvs_commit(my_handle) != ESP_OK)
+        return -1;
+
+    nvs_close(my_handle);
+    return 0;
 }

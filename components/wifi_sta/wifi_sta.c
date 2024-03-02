@@ -70,7 +70,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
-void wifi_sta_init(void)
+void wifi_sta_init(const char* ssid, const char* password)
 {
     esp_netif_create_default_wifi_sta();
 
@@ -90,11 +90,6 @@ void wifi_sta_init(void)
                                                         NULL,
                                                         &instance_got_ip));
 
-    ESP_LOGI(TAG, "wifi_sta_init finished.");
-}
-
-void wifi_sta_start(const char* ssid, const char* password)
-{
     wifi_config_t wifi_config = {
         .sta = {
             /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (pasword len => 8).
@@ -112,5 +107,7 @@ void wifi_sta_start(const char* ssid, const char* password)
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-    ESP_ERROR_CHECK(esp_wifi_start() );
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    ESP_LOGI(TAG, "wifi_sta_init finished.");
 }
