@@ -50,6 +50,10 @@
 
 static const char *TAG = "wifi_sta";
 
+struct wifi_sta wifi_sta = {
+    .is_internet = false,
+};
+
 static int s_retry_num = 0;
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)

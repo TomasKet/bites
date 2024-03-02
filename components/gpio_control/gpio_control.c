@@ -9,31 +9,19 @@
 static const char *TAG = "gpio_control";
 
 #define PIN_GPIO 5
+
 #define SECONDS_IN_MIN  60
 #define SECONDS_IN_HOUR 3600
 
-static void sntp_process(void)
+void led_control(void)
 {
+    time_t now;
+    struct tm timeinfo;
+
     gpio_reset_pin(PIN_GPIO);
     gpio_set_direction(PIN_GPIO, GPIO_MODE_OUTPUT);
     gpio_hold_dis(PIN_GPIO);
     gpio_set_level(PIN_GPIO, 0);
-
-    time_t now;
-    struct tm timeinfo;
-
-    // update 'now' variable with current time
-    time(&now);
-    localtime_r(&now, &timeinfo);
-
-    char strftime_buf[64];
-
-    // Set timezone to Vilnius Standard Time
-    setenv("TZ", "EET-2EEST-3,M3.5.0/03:00:00,M10.5.0/04:00:00", 1);
-    tzset();
-    localtime_r(&now, &timeinfo);
-    strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-    ESP_LOGI(TAG, "The current date/time in Vilnius is: %s", strftime_buf);
 
     const int hours_start = 6;
     const int minutes_start = 40;
@@ -44,6 +32,8 @@ static void sntp_process(void)
     time_t start_time = hours_start * 3600 + minutes_start * 60;
     time_t end_time = hours_end * 3600 + minutes_end * 60;
 
+    time(&now);
+    localtime_r(&now, &timeinfo);
     time_t time_day = timeinfo.tm_hour * 3600 + timeinfo.tm_min * 60 + timeinfo.tm_sec;
     ESP_LOGI(TAG, "time_day %d", (int)(time_day));
 

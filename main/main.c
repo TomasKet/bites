@@ -8,6 +8,8 @@
 #include "wifi_ap.h"
 #include "wifi_sta.h"
 #include "http_server.h"
+#include "time_control.h"
+#include "gpio_control.h"
 
 static const char *TAG = "main";
 
@@ -32,6 +34,16 @@ void app_main(void)
         wifi_ap_init();
 
     http_server_init();
+
+    while(true) {
+        if (wifi_sta.is_internet) {
+            sntp_sync();
+            break;
+        }
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+    led_control();
 }
 
 static void init_nvs(void)

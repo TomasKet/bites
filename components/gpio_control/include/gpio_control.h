@@ -1,1 +1,1 @@
-void func(void);
+void led_control(void);

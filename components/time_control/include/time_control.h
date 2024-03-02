@@ -1,1 +1,1 @@
-void func(void);
+void sntp_sync(void);
