@@ -3,16 +3,16 @@
 #include "esp_netif.h"
 #include "nvs_flash.h"
 #include <string.h>
+#include "mdns.h"
 
 #include "wifi_ap.h"
 #include "wifi_sta.h"
 #include "http_server.h"
-#include "time_control.h"
-#include "gpio_control.h"
 
 static const char *TAG = "main";
 
 static void init_nvs(void);
+static void init_mdns(void);
 
 char ssid[32] = { 0 };
 char pass[32] = { 0 };
@@ -23,6 +23,8 @@ void app_main(void)
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    init_mdns();
 
     if (strlen(ssid) > 0 && strlen(pass) > 0)
         wifi_sta_init(ssid, pass);
@@ -55,4 +57,14 @@ static void init_nvs(void)
     ESP_LOGI(TAG,"NVS ssid:%s pass:%s\n", ssid, pass);
 
     nvs_close(my_handle);
+}
+
+static void init_mdns(void)
+{
+    char *hostname = "esp32";
+    //initialize mDNS
+    ESP_ERROR_CHECK( mdns_init() );
+    //set mDNS hostname (required if you want to advertise services)
+    ESP_ERROR_CHECK( mdns_hostname_set(hostname) );
+    ESP_LOGI(TAG, "mdns hostname set to: [%s]", hostname);
 }
