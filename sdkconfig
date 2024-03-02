@@ -389,7 +389,7 @@ CONFIG_EXAMPLE_CONNECT_IPV4=y
 #
 
 #
-# SNTP Configuration
+# time_control Configuration
 #
 
 #

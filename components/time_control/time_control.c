@@ -3,9 +3,9 @@
 #include "esp_log.h"
 #include <time.h>
 
-#include "sntp.h"
+#include "time_control.h"
 
-static const char *TAG = "sntp";
+static const char *TAG = "time_control";
 
 void time_sync_notification_cb(struct timeval *tv)
 {

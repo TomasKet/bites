@@ -1,4 +1,4 @@
 idf_component_register(
-    SRCS "sntp.c"
+    SRCS "time_control.c"
     INCLUDE_DIRS "include"
     REQUIRES esp_netif)
