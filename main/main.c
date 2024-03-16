@@ -10,6 +10,7 @@
 #include "http_server.h"
 #include "time_control.h"
 #include "gpio_control.h"
+#include "bites_i2s_stream.h"
 
 static const char *TAG = "main";
 
@@ -18,6 +19,7 @@ static void init_mdns(void);
 
 char ssid[32] = { 0 };
 char pass[32] = { 0 };
+char stream_uri[100] = { 0 };
 
 void app_main(void)
 {
@@ -28,10 +30,11 @@ void app_main(void)
 
     init_mdns();
 
-    if (strlen(ssid) > 0 && strlen(pass) > 0)
+    if (strlen(ssid) > 0 && strlen(pass) > 0) {
         wifi_sta_init(ssid, pass);
-    else
+    } else {
         wifi_ap_init();
+    }
 
     http_server_init();
 
@@ -43,6 +46,9 @@ void app_main(void)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
+    if (strlen(stream_uri) > 0) {
+        i2s_stream_start();
+    }
     led_control();
 }
 
@@ -65,8 +71,10 @@ static void init_nvs(void)
     nvs_get_str(my_handle, "wifi_ssid", ssid, &len);
     len = 32;
     nvs_get_str(my_handle, "wifi_password", pass, &len);
+    len = sizeof(stream_uri);
+    nvs_get_str(my_handle, "stream_uri", stream_uri, &len);
 
-    ESP_LOGI(TAG,"NVS ssid:%s pass:%s\n", ssid, pass);
+    ESP_LOGI(TAG,"NVS ssid:%s pass:%s stream_uri:%s\n", ssid, pass, stream_uri);
 
     nvs_close(my_handle);
 }

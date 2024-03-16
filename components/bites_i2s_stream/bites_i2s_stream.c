@@ -23,9 +23,10 @@
 
 static const char *TAG = "HTTP_MP3_EXAMPLE";
 
-#define STREAM_URI "http://stream.palanga.live/palanga128.mp3"
+//"http://stream.palanga.live/palanga128.mp3"
+extern char stream_uri[];
 
-void i2s_stream_main(void)
+void i2s_stream_start(void)
 {
     audio_pipeline_handle_t pipeline;
     audio_element_handle_t http_stream_reader, i2s_stream_writer, mp3_decoder;
@@ -65,7 +66,7 @@ void i2s_stream_main(void)
     audio_pipeline_link(pipeline, &link_tag[0], 3);
 
     ESP_LOGI(TAG, "[2.6] Set up  uri (http as http_stream, mp3 as mp3 decoder, and default output is i2s)");
-    audio_element_set_uri(http_stream_reader, STREAM_URI);
+    audio_element_set_uri(http_stream_reader, stream_uri);
 
     ESP_LOGI(TAG, "[ 3 ] Start and wait for Wi-Fi network");
     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();

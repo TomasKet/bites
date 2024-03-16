@@ -1,1 +1,1 @@
-void func(void);
+void i2s_stream_start(void);

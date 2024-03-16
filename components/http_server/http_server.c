@@ -23,6 +23,8 @@ static const char *HTML_FORM = \
         "<input type=\"text\" id=\"ssid\" name=\"ssid\"><br>"\
         "<label for=\"pass\">Password:</label><br>"\
         "<input type=\"text\" id=\"pass\" name=\"pass\"><br>"\
+        "<label for=\"stream_uri\">Tunas:</label><br>"\
+        "<input type=\"text\" id=\"stream_uri\" name=\"stream_uri\"><br>"\
         "<input type=\"submit\" value=\"Submit\">"\
     "</form>\
 </html>";
@@ -146,6 +148,9 @@ static int save_params(char *buff)
                 return -1;
         if (strstr(token, "pass="))
             if (nvs_set_str(my_handle, "wifi_password", token + strlen("pass=")) != ESP_OK)
+                return -1;
+        if (strstr(token, "stream_uri="))
+            if (nvs_set_str(my_handle, "stream_uri", token + strlen("stream_uri=")) != ESP_OK)
                 return -1;
 
         token = strtok(NULL, "&");
