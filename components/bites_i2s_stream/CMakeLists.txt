@@ -1,2 +1,4 @@
-idf_component_register(SRCS "bites_i2s_stream.c"
-                    INCLUDE_DIRS "include")
+idf_component_register(
+    SRCS
+    INCLUDE_DIRS "include"
+    REQUIRES esp_wifi)
