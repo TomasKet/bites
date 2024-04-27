@@ -1,3 +1,5 @@
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "driver/gpio.h"
 #include "esp_sleep.h"
 #include "esp_log.h"
@@ -8,10 +10,17 @@
 
 static const char *TAG = "gpio_control";
 
+struct button btn[BUTTON_COUNT] = { 
+    { .gpio = 14 },
+    { .gpio = 12 },
+};
+
 #define PIN_GPIO 5
 
 #define SECONDS_IN_MIN  60
 #define SECONDS_IN_HOUR 3600
+
+static void gpio_task(void *);
 
 void led_control(void)
 {
@@ -60,4 +69,68 @@ void led_control(void)
     gpio_deep_sleep_hold_en();
 
     esp_deep_sleep(1000000LL * timeout);
+}
+
+int gpio_init(void)
+{
+    gpio_config_t cfg = {
+        .pin_bit_mask = 1 << btn[0].gpio | 1 << btn[1].gpio,
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+    };
+    if (gpio_config(&cfg)) {
+		return -1;
+    }
+	if (xTaskCreate(gpio_task, TAG, 2028, NULL, configMAX_PRIORITIES - 3, NULL) != pdPASS) {
+		return -1;
+	}
+
+	return 0;
+}
+
+static void gpio_task(void *)
+{
+	while (1) {
+        for (int i = 0; i < BUTTON_COUNT; i++) {
+            btn[i].is_pressed = !gpio_get_level(btn[i].gpio);
+            if (btn[i].is_pressed) {
+                btn[i].time_pressed += GPIO_TASK_DELAY;
+            }
+        }
+
+		if (!btn[0].is_pressed && !btn[1].is_pressed) {
+            if (btn[0].time_pressed > TIMEOUT_DEFAULTS && btn[1].time_pressed > TIMEOUT_DEFAULTS) {
+				ESP_LOGI(TAG, "restore defaults");
+                restore_defaults();
+                esp_restart();
+            } else if (btn[0].time_pressed > TIMEOUT_RESET && btn[1].time_pressed > TIMEOUT_RESET) {
+				ESP_LOGI(TAG, "reset");
+                esp_restart();
+            } else if (btn[0].time_pressed > TIMEOUT_CH_SWITCH || btn[1].time_pressed > TIMEOUT_CH_SWITCH) {
+                if (btn[0].time_pressed > TIMEOUT_CH_SWITCH) {
+                    ESP_LOGI(TAG, "ch++");
+                    // i2s_ch_select(ch++);
+                } else if (btn[1].time_pressed > TIMEOUT_CH_SWITCH) {
+                    ESP_LOGI(TAG, "ch--");
+                    // i2s_ch_select(ch--);
+                }
+            } else if (btn[0].time_pressed > 0 || btn[1].time_pressed > 0) {
+                if (btn[0].time_pressed > 0) {
+                    ESP_LOGI(TAG, "vol++");
+                    // i2s_volume_up();
+                } else if (btn[1].time_pressed > 0) {
+                    ESP_LOGI(TAG, "vol--");
+                    // i2s_volume_down();
+                }
+            }
+		}
+
+        for (int i = 0; i < BUTTON_COUNT; i++) {
+            if (!btn[i].is_pressed) {
+                btn[i].time_pressed = 0;
+            }
+        }
+		vTaskDelay(GPIO_TASK_DELAY / portTICK_PERIOD_MS);
+	}
 }

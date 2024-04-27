@@ -14,8 +14,8 @@
 
 static const char *TAG = "main";
 
-static void init_nvs(void);
-static void init_mdns(void);
+static int init_nvs(void);
+static int init_mdns(void);
 
 char ssid[32] = { 0 };
 char pass[32] = { 0 };
@@ -23,49 +23,59 @@ char stream_uri[100] = { 0 };
 
 void app_main(void)
 {
-    init_nvs();
+    ESP_ERROR_CHECK(init_nvs());
+    ESP_ERROR_CHECK(gpio_init());
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     init_mdns();
 
-    if (strlen(ssid) > 0 && strlen(pass) > 0) {
-        wifi_sta_init(ssid, pass);
-    } else {
-        wifi_ap_init();
-    }
+    // if (strlen(ssid) > 0 && strlen(pass) > 0) {
+    //     ESP_ERROR_CHECK(wifi_sta_init(ssid, pass))
+    // } else {
+    //     ESP_ERROR_CHECK(wifi_ap_init())
+    // }
 
-    http_server_init();
+    // ESP_ERROR_CHECK(http_server_init())
 
-    while(true) {
-        if (wifi_sta.is_internet) {
-            sntp_sync();
-            break;
-        }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
-    if (strlen(stream_uri) > 0) {
-        i2s_stream_start();
-    }
-    led_control();
+    // while(true) {
+    //     if (wifi_sta.is_internet) {
+    //         sntp_sync();
+    //         break;
+    //     }
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // }
+    
+    // if (strlen(stream_uri) > 0) {
+    //     i2s_stream_start();
+    // }
+    // led_control();
 }
 
-static void init_nvs(void)
+static int init_nvs(void)
 {
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_LOGE(TAG, "nvs flash erase");
-        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_erase();
+        if (ret != ESP_OK) {
+            return ret;
+        }
         ret = nvs_flash_init();
+        if (ret != ESP_OK) {
+            return ret;
+        }
     }
-    ESP_ERROR_CHECK(ret);
+    if (ret != ESP_OK) {
+        return ret;
+    }
 
     nvs_handle_t my_handle;
     ret = nvs_open("storage", NVS_READWRITE, &my_handle);
-    if (ret != ESP_OK)
-        ESP_LOGE(TAG, "nvs open fail");
+    if (ret != ESP_OK) {
+        return ret;
+    }
 
     size_t len = 32;
     nvs_get_str(my_handle, "wifi_ssid", ssid, &len);
@@ -77,14 +87,22 @@ static void init_nvs(void)
     ESP_LOGI(TAG,"NVS ssid:%s pass:%s stream_uri:%s\n", ssid, pass, stream_uri);
 
     nvs_close(my_handle);
+    return 0;
 }
 
-static void init_mdns(void)
+static int init_mdns(void)
 {
     char *hostname = "esp32";
     //initialize mDNS
-    ESP_ERROR_CHECK( mdns_init() );
+    esp_err_t ret = mdns_init();
+    if (ret != ESP_OK) {
+        return ret;
+    }
     //set mDNS hostname (required if you want to advertise services)
-    ESP_ERROR_CHECK( mdns_hostname_set(hostname) );
+    ret = mdns_hostname_set(hostname);
+    if (ret != ESP_OK) {
+        return ret;
+    }
     ESP_LOGI(TAG, "mdns hostname set to: [%s]", hostname);
+    return 0;
 }
