@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "gpio_control.h"
+#include "storas.h"
 
 static const char *TAG = "gpio_control";
 
@@ -101,9 +102,12 @@ static void gpio_task(void *)
 
 		if (!btn[0].is_pressed && !btn[1].is_pressed) {
             if (btn[0].time_pressed > TIMEOUT_DEFAULTS && btn[1].time_pressed > TIMEOUT_DEFAULTS) {
-				ESP_LOGI(TAG, "restore defaults");
-                restore_defaults();
-                esp_restart();
+                if (restore_defaults()) {
+    				ESP_LOGI(TAG, "restore defaults failed");
+                } else {
+                    ESP_LOGI(TAG, "restore defaults");
+                    esp_restart();
+                }
             } else if (btn[0].time_pressed > TIMEOUT_RESET && btn[1].time_pressed > TIMEOUT_RESET) {
 				ESP_LOGI(TAG, "reset");
                 esp_restart();

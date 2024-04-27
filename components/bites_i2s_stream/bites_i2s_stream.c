@@ -20,11 +20,12 @@
 #include "periph_wifi.h"
 #include "board.h"
 #include "bites_i2s_stream.h"
+#include "storas.h"
 
 static const char *TAG = "HTTP_MP3_EXAMPLE";
 
 //"http://stream.palanga.live/palanga128.mp3"
-extern char stream_uri[];
+// extern char stream_uri[];
 
 void i2s_stream_start(void)
 {
