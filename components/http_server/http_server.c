@@ -30,6 +30,7 @@ static const char *HTML_FORM = \
 </html>";
 
 static int save_params(char *buff);
+static int uri_decode(char* out, const char* in);
 
 /* An HTTP GET handler */
 static esp_err_t root_get_handler(httpd_req_t *req)
@@ -131,7 +132,6 @@ void http_server_init(void)
 {
     static httpd_handle_t server;
     server =  start_webserver();
-
 }
 
 static int save_params(char *buff)
@@ -149,9 +149,13 @@ static int save_params(char *buff)
         if (strstr(token, "pass="))
             if (nvs_set_str(my_handle, "wifi_password", token + strlen("pass=")) != ESP_OK)
                 return -1;
-        if (strstr(token, "stream_uri="))
-            if (nvs_set_str(my_handle, "stream_uri", token + strlen("stream_uri=")) != ESP_OK)
+        if (strstr(token, "stream_uri=")) {
+            char *uri_decoded = malloc(100);
+            if (uri_decode(uri_decoded, token + strlen("stream_uri=")))
                 return -1;
+            if (nvs_set_str(my_handle, "stream_uri", uri_decoded) != ESP_OK)
+                return -1;
+        }
 
         token = strtok(NULL, "&");
     }
@@ -160,5 +164,43 @@ static int save_params(char *buff)
         return -1;
 
     nvs_close(my_handle);
+    return 0;
+}
+
+static int uri_decode(char* out, const char* in)
+{
+    static const char tbl[256] = {
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+         0, 1, 2, 3, 4, 5, 6, 7,  8, 9,-1,-1,-1,-1,-1,-1,
+        -1,10,11,12,13,14,15,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,10,11,12,13,14,15,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
+        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1
+    };
+    char c, v1, v2, *beg=out;
+    if (in != NULL) {
+        while ((c=*in++) != '\0') {
+            if (c == '%') {
+                if ((v1=tbl[(unsigned char)*in++]) < 0 ||
+                    (v2=tbl[(unsigned char)*in++]) < 0) {
+                    *beg = '\0';
+                    return -1;
+                }
+                c = (v1<<4)|v2;
+            }
+            *out++ = c;
+        }
+    }
+    *out = '\0';
     return 0;
 }
