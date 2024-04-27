@@ -25,12 +25,13 @@
 static const char *TAG = "HTTP_MP3_EXAMPLE";
 
 //"http://stream.palanga.live/palanga128.mp3"
-// extern char stream_uri[];
+int volume = 0;
+audio_element_handle_t i2s_stream_writer;
 
 void i2s_stream_start(void)
 {
     audio_pipeline_handle_t pipeline;
-    audio_element_handle_t http_stream_reader, i2s_stream_writer, mp3_decoder;
+    audio_element_handle_t http_stream_reader, mp3_decoder;
 
     esp_log_level_set("*", ESP_LOG_WARN);
     esp_log_level_set(TAG, ESP_LOG_DEBUG);
@@ -51,6 +52,7 @@ void i2s_stream_start(void)
     ESP_LOGI(TAG, "[2.2] Create i2s stream to write data to codec chip");
     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
     i2s_cfg.type = AUDIO_STREAM_WRITER;
+    i2s_cfg.use_alc = true;
     i2s_stream_writer = i2s_stream_init(&i2s_cfg);
 
     ESP_LOGI(TAG, "[2.3] Create mp3 decoder to decode mp3 file");
@@ -132,4 +134,24 @@ void i2s_stream_start(void)
     audio_element_deinit(http_stream_reader);
     audio_element_deinit(i2s_stream_writer);
     audio_element_deinit(mp3_decoder);
+}
+
+int i2s_volume_up(void)
+{
+    if (i2s_alc_volume_set(i2s_stream_writer, volume + 5)) {
+        return -1;
+    }
+    volume += 5;
+    ESP_LOGI(TAG, "Volume=%d", volume);
+    return 0;
+}
+
+int i2s_volume_down(void)
+{
+    if (i2s_alc_volume_set(i2s_stream_writer, volume - 5)) {
+        return -1;
+    }
+    volume -= 5;
+    ESP_LOGI(TAG, "Volume=%d", volume);
+    return 0;
 }

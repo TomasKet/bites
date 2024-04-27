@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "gpio_control.h"
+#include "bites_i2s_stream.h"
 #include "storas.h"
 
 static const char *TAG = "gpio_control";
@@ -122,10 +123,10 @@ static void gpio_task(void *)
             } else if (btn[0].time_pressed > 0 || btn[1].time_pressed > 0) {
                 if (btn[0].time_pressed > 0) {
                     ESP_LOGI(TAG, "vol++");
-                    // i2s_volume_up();
+                    i2s_volume_up();
                 } else if (btn[1].time_pressed > 0) {
                     ESP_LOGI(TAG, "vol--");
-                    // i2s_volume_down();
+                    i2s_volume_down();
                 }
             }
 		}
