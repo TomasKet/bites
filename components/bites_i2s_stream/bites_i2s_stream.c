@@ -69,16 +69,6 @@ void i2s_stream_start(void)
     ESP_LOGI(TAG, "[2.6] Set up  uri (http as http_stream, mp3 as mp3 decoder, and default output is i2s)");
     audio_element_set_uri(http_stream_reader, stream_uri);
 
-    ESP_LOGI(TAG, "[ 3 ] Start and wait for Wi-Fi network");
-    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-    periph_wifi_cfg_t wifi_cfg = {
-        .wifi_config.sta.ssid = "Private_Teltonika",
-        .wifi_config.sta.password = "teltonika20",
-    };
-    esp_periph_handle_t wifi_handle = periph_wifi_init(&wifi_cfg);
-    esp_periph_start(set, wifi_handle);
-    periph_wifi_wait_for_connected(wifi_handle, portMAX_DELAY);
     
     // Example of using an audio event -- START
     ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
@@ -87,9 +77,6 @@ void i2s_stream_start(void)
 
     ESP_LOGI(TAG, "[4.1] Listening event from all elements of pipeline");
     audio_pipeline_set_listener(pipeline, evt);
-
-    ESP_LOGI(TAG, "[4.2] Listening event from peripherals");
-    audio_event_iface_set_listener(esp_periph_set_get_event_iface(set), evt);
 
     ESP_LOGI(TAG, "[ 5 ] Start audio_pipeline");
     audio_pipeline_run(pipeline);
@@ -137,10 +124,6 @@ void i2s_stream_start(void)
 
     audio_pipeline_remove_listener(pipeline);
 
-    /* Stop all peripherals before removing the listener */
-    esp_periph_set_stop_all(set);
-    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(set), evt);
-
     /* Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface */
     audio_event_iface_destroy(evt);
 
@@ -149,5 +132,4 @@ void i2s_stream_start(void)
     audio_element_deinit(http_stream_reader);
     audio_element_deinit(i2s_stream_writer);
     audio_element_deinit(mp3_decoder);
-    esp_periph_set_destroy(set);
 }

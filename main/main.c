@@ -24,27 +24,27 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    init_mdns();
+    ESP_ERROR_CHECK(init_mdns());
 
-    // if (strlen(ssid) > 0 && strlen(pass) > 0) {
-    //     ESP_ERROR_CHECK(wifi_sta_init(ssid, pass))
-    // } else {
-    //     ESP_ERROR_CHECK(wifi_ap_init())
-    // }
+    if (strlen(ssid) > 0 && strlen(pass) > 0) {
+        wifi_sta_init(ssid, pass);
+    } else {
+        wifi_ap_init();
+    }
 
-    // ESP_ERROR_CHECK(http_server_init())
+    http_server_init();
 
-    // while(true) {
-    //     if (wifi_sta.is_internet) {
-    //         sntp_sync();
-    //         break;
-    //     }
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    // }
+    while(true) {
+        if (wifi_sta.is_internet) {
+            sntp_sync();
+            break;
+        }
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
     
-    // if (strlen(stream_uri) > 0) {
-    //     i2s_stream_start();
-    // }
+    if (strlen(stream_uri) > 0) {
+        i2s_stream_start();
+    }
     // led_control();
 }
 
