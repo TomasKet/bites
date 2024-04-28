@@ -1,3 +1,15 @@
 menu "Bites Configuration"
 
+config WIFI_SSID
+    string "WiFi SSID"
+	default ""
+
+config WIFI_PASSWORD
+    string "WiFi Password"
+    default ""
+
+config MDNS_HOSTNAME
+    string "Hostname for mDNS (*.local)"
+    default "bites"
+
 endmenu

@@ -373,6 +373,10 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 # Bites Configuration
 #
+CONFIG_WIFI_SSID=""
+CONFIG_WIFI_PASSWORD=""
+CONFIG_MDNS_HOSTNAME="bites"
+# end of Bites Configuration
 
 #
 # Audio HAL
@@ -1791,6 +1795,14 @@ CONFIG_CODEC_TAS5805M_SUPPORT=y
 # end of Audio Codec Device Configuration
 
 #
+# jsmn
+#
+# CONFIG_JSMN_PARENT_LINKS is not set
+# CONFIG_JSMN_STRICT is not set
+# CONFIG_JSMN_STATIC is not set
+# end of jsmn
+
+#
 # DSP Library
 #
 CONFIG_DSP_OPTIMIZATIONS_SUPPORTED=y
@@ -1806,14 +1818,6 @@ CONFIG_DSP_MAX_FFT_SIZE_4096=y
 # CONFIG_DSP_MAX_FFT_SIZE_32768 is not set
 CONFIG_DSP_MAX_FFT_SIZE=4096
 # end of DSP Library
-
-#
-# jsmn
-#
-# CONFIG_JSMN_PARENT_LINKS is not set
-# CONFIG_JSMN_STRICT is not set
-# CONFIG_JSMN_STATIC is not set
-# end of jsmn
 
 #
 # mDNS

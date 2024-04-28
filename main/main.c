@@ -48,17 +48,14 @@ void app_main(void)
 
 static int init_mdns(void)
 {
-    char *hostname = "esp32";
-    //initialize mDNS
     esp_err_t ret = mdns_init();
     if (ret != ESP_OK) {
         return ret;
     }
-    //set mDNS hostname (required if you want to advertise services)
-    ret = mdns_hostname_set(hostname);
+    ret = mdns_hostname_set(CONFIG_MDNS_HOSTNAME);
     if (ret != ESP_OK) {
         return ret;
     }
-    ESP_LOGI(TAG, "mdns hostname set to: [%s]", hostname);
+    ESP_LOGI(TAG, "mdns hostname set to: [%s]", CONFIG_MDNS_HOSTNAME);
     return 0;
 }
