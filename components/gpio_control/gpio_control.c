@@ -115,10 +115,10 @@ static void gpio_task(void *)
             } else if (btn[0].time_pressed > TIMEOUT_CH_SWITCH || btn[1].time_pressed > TIMEOUT_CH_SWITCH) {
                 if (btn[0].time_pressed > TIMEOUT_CH_SWITCH) {
                     ESP_LOGI(TAG, "ch++");
-                    // i2s_ch_select(ch++);
+                    i2s_channel_next();
                 } else if (btn[1].time_pressed > TIMEOUT_CH_SWITCH) {
                     ESP_LOGI(TAG, "ch--");
-                    // i2s_ch_select(ch--);
+                    i2s_channel_prev();
                 }
             } else if (btn[0].time_pressed > 0 || btn[1].time_pressed > 0) {
                 if (btn[0].time_pressed > 0) {

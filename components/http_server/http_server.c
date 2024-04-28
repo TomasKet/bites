@@ -153,7 +153,7 @@ static int save_params(char *buff)
             char *uri_decoded = malloc(100);
             if (uri_decode(uri_decoded, token + strlen("stream_uri=")))
                 return -1;
-            if (nvs_set_str(my_handle, "stream_uri", uri_decoded) != ESP_OK)
+            if (nvs_set_str(my_handle, "stream_uri_custom", uri_decoded) != ESP_OK)
                 return -1;
         }
 

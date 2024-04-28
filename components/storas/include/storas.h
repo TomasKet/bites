@@ -6,6 +6,6 @@ int restore_defaults(void);
 
 extern char ssid[];
 extern char pass[];
-extern char stream_uri[];
+extern char stream_uri_custom[];
 
 #endif /* __STORAS__H__ */

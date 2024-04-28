@@ -42,9 +42,7 @@ void app_main(void)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     
-    if (strlen(stream_uri) > 0) {
-        i2s_stream_start();
-    }
+    i2s_stream_start();
     // led_control();
 }
 

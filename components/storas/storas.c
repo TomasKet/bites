@@ -7,7 +7,7 @@ static const char *TAG = "storas";
 
 char ssid[32];
 char pass[32];
-char stream_uri[100];
+char stream_uri_custom[100];
 
 int init_storas(void)
 {
@@ -37,10 +37,10 @@ int init_storas(void)
     nvs_get_str(my_handle, "wifi_ssid", ssid, &len);
     len = 32;
     nvs_get_str(my_handle, "wifi_password", pass, &len);
-    len = sizeof(stream_uri);
-    nvs_get_str(my_handle, "stream_uri", stream_uri, &len);
+    len = sizeof(stream_uri_custom);
+    nvs_get_str(my_handle, "stream_uri_custom", stream_uri_custom, &len);
 
-    ESP_LOGI(TAG,"NVS ssid:%s pass:%s stream_uri:%s\n", ssid, pass, stream_uri);
+    ESP_LOGI(TAG,"NVS ssid:%s pass:%s stream_uri_custom:%s\n", ssid, pass, stream_uri_custom);
 
     nvs_close(my_handle);
     return 0;
