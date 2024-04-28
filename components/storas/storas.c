@@ -39,9 +39,9 @@ int init_storas(void)
     len = 32;
     nvs_get_str(storas_handle, "wifi_password", pass, &len);
     len = sizeof(stream_uri_custom);
-    nvs_get_str(storas_handle, "stream_uri_custom", stream_uri_custom, &len);
+    nvs_get_str(storas_handle, "stream_uri", stream_uri_custom, &len);
 
-    ESP_LOGI(TAG,"NVS ssid:%s pass:%s stream_uri_custom:%s\n", ssid, pass, stream_uri_custom);
+    ESP_LOGI(TAG,"NVS ssid:%s pass:%s stream_uri:%s\n", ssid, pass, stream_uri_custom);
 
     return 0;
 }

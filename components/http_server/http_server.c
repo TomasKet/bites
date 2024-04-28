@@ -139,13 +139,13 @@ static int save_params(char *buff)
     char *token;
     token = strtok(buff, "&");
     while (token != NULL) {
-        if (strstr(token, "ssid="))
+        if (strstr(token, "ssid=") && strlen("ssid=") > 0)
             if (storas_set_str("wifi_ssid", token + strlen("ssid=")) != 0)
                 return -1;
-        if (strstr(token, "pass="))
+        if (strstr(token, "pass=") && strlen("pass=") > 0)
             if (storas_set_str("wifi_password", token + strlen("pass=")) != 0)
                 return -1;
-        if (strstr(token, "stream_uri=")) {
+        if (strstr(token, "stream_uri=") && strlen("stream_uri=") > 0) {
             char *uri_decoded = malloc(100);
             if (uri_decode(uri_decoded, token + strlen("stream_uri=")))
                 return -1;
@@ -154,7 +154,7 @@ static int save_params(char *buff)
                 memcpy(p, "http", strlen("http"));
                 memmove(p + strlen("http"), p + strlen("https"), strlen(p + strlen("https")) + 1);
             }
-            if (storas_set_str("stream_uri_custom", uri_decoded) != 0)
+            if (storas_set_str("stream_uri", uri_decoded) != 0)
                 return -1;
         }
 
