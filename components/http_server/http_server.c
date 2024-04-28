@@ -149,6 +149,11 @@ static int save_params(char *buff)
             char *uri_decoded = malloc(100);
             if (uri_decode(uri_decoded, token + strlen("stream_uri=")))
                 return -1;
+            char *p = strstr(uri_decoded, "https");
+            if (p != NULL) {
+                memcpy(p, "http", strlen("http"));
+                memmove(p + strlen("http"), p + strlen("https"), strlen(p + strlen("https")) + 1);
+            }
             if (storas_set_str("stream_uri_custom", uri_decoded) != 0)
                 return -1;
         }
