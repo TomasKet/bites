@@ -7,10 +7,10 @@ struct button {
     int         time_pressed;
 };
 
-#define GPIO_TASK_DELAY     200
+#define GPIO_TASK_DELAY     50
 
 #define BUTTON_COUNT        2
 
 #define TIMEOUT_RESET       1000
 #define TIMEOUT_DEFAULTS    5000
-#define TIMEOUT_CH_SWITCH   1000
+#define TIMEOUT_CH_SWITCH   700

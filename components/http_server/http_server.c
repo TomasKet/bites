@@ -4,7 +4,6 @@
 #include <esp_system.h>
 #include <sys/param.h>
 #include "esp_netif.h"
-#include "nvs_flash.h"
 
 #include "esp_https_server.h"
 #include "esp_tls.h"
@@ -13,6 +12,7 @@
 #include <string.h>
 
 #include "http_server.h"
+#include "storas.h"
 
 static const char *TAG = "http_server";
 
@@ -136,34 +136,25 @@ void http_server_init(void)
 
 static int save_params(char *buff)
 {
-    nvs_handle_t my_handle;
-    if (nvs_open("storage", NVS_READWRITE, &my_handle) != ESP_OK)
-        return -1;
-
     char *token;
     token = strtok(buff, "&");
     while (token != NULL) {
         if (strstr(token, "ssid="))
-            if (nvs_set_str(my_handle, "wifi_ssid", token + strlen("ssid=")) != ESP_OK)
+            if (storas_set_str("wifi_ssid", token + strlen("ssid=")) != 0)
                 return -1;
         if (strstr(token, "pass="))
-            if (nvs_set_str(my_handle, "wifi_password", token + strlen("pass=")) != ESP_OK)
+            if (storas_set_str("wifi_password", token + strlen("pass=")) != 0)
                 return -1;
         if (strstr(token, "stream_uri=")) {
             char *uri_decoded = malloc(100);
             if (uri_decode(uri_decoded, token + strlen("stream_uri=")))
                 return -1;
-            if (nvs_set_str(my_handle, "stream_uri_custom", uri_decoded) != ESP_OK)
+            if (storas_set_str("stream_uri_custom", uri_decoded) != 0)
                 return -1;
         }
 
         token = strtok(NULL, "&");
     }
-
-    if (nvs_commit(my_handle) != ESP_OK)
-        return -1;
-
-    nvs_close(my_handle);
     return 0;
 }
 

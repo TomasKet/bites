@@ -9,6 +9,8 @@ char ssid[32];
 char pass[32];
 char stream_uri_custom[100];
 
+nvs_handle_t storas_handle;
+
 int init_storas(void)
 {
     esp_err_t ret = nvs_flash_init();
@@ -27,26 +29,55 @@ int init_storas(void)
         return ret;
     }
 
-    nvs_handle_t my_handle;
-    ret = nvs_open("storage", NVS_READWRITE, &my_handle);
+    ret = nvs_open("storage", NVS_READWRITE, &storas_handle);
     if (ret != ESP_OK) {
         return ret;
     }
 
     size_t len = 32;
-    nvs_get_str(my_handle, "wifi_ssid", ssid, &len);
+    nvs_get_str(storas_handle, "wifi_ssid", ssid, &len);
     len = 32;
-    nvs_get_str(my_handle, "wifi_password", pass, &len);
+    nvs_get_str(storas_handle, "wifi_password", pass, &len);
     len = sizeof(stream_uri_custom);
-    nvs_get_str(my_handle, "stream_uri_custom", stream_uri_custom, &len);
+    nvs_get_str(storas_handle, "stream_uri_custom", stream_uri_custom, &len);
 
     ESP_LOGI(TAG,"NVS ssid:%s pass:%s stream_uri_custom:%s\n", ssid, pass, stream_uri_custom);
 
-    nvs_close(my_handle);
     return 0;
 }
 
 int restore_defaults(void)
 {
     return nvs_flash_erase();
+}
+
+int storas_set_str(const char* key, const char* value)
+{
+    if (nvs_set_str(storas_handle, key, value) != ESP_OK) {
+        return -1;
+    }
+    if (nvs_commit(storas_handle) != ESP_OK) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int storas_set_int(const char* key, int value)
+{
+    if (nvs_set_i32(storas_handle, key, (int32_t)value) != ESP_OK) {
+        return -1;
+    }
+    if (nvs_commit(storas_handle) != ESP_OK) {
+        return -1;
+    }
+    return 0;
+}
+
+int storas_get_int(const char* key, int* out_value)
+{
+    if (nvs_get_i32(storas_handle, key, (int32_t *)out_value) != ESP_OK) {
+        return -1;
+    }
+    return 0;
 }

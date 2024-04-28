@@ -33,11 +33,15 @@ const int stream_uri_preset_sz = sizeof(stream_uri_preset) / sizeof(stream_uri_p
 struct i2s_stream_handle_t i2s;
 
 static void i2s_stream_restart(void);
+static int uri_set_by_channel(int channel);
 
-void i2s_stream_start(void)
+static int volume_set(int volume);
+static int channel_set(int channel);
+
+int i2s_stream_start(void)
 {
-    esp_log_level_set("*", ESP_LOG_WARN);
-    esp_log_level_set(TAG, ESP_LOG_DEBUG);
+    storas_get_int("volume", &i2s.volume);
+    storas_get_int("channel", &i2s.channel);
 
     ESP_LOGI(TAG, "[ 1 ] Start audio codec chip");
     audio_board_handle_t board_handle = audio_board_init();
@@ -72,8 +76,7 @@ void i2s_stream_start(void)
     audio_pipeline_link(i2s.pipeline, &link_tag[0], 3);
 
     ESP_LOGI(TAG, "[2.6] Set up  uri (http as http_stream, mp3 as mp3 decoder, and default output is i2s)");
-    audio_element_set_uri(i2s.http_stream_reader, stream_uri_preset[i2s.channel]);
-
+    uri_set_by_channel(i2s.channel);
 
     // Example of using an audio event -- START
     ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
@@ -141,75 +144,97 @@ void i2s_stream_start(void)
 
 int i2s_volume_up(void)
 {
-    if (i2s_alc_volume_set(i2s.i2s_stream_writer, i2s.volume + 5)) {
+    if (i2s.volume >= 30) {
+        return 0;
+    }
+    int volume_new = i2s.volume + 5;
+    if (volume_set(volume_new) != 0) {
         return -1;
     }
-    i2s.volume += 5;
-    ESP_LOGI(TAG, "Volume=%d", i2s.volume);
     return 0;
 }
 
 int i2s_volume_down(void)
 {
-    if (i2s_alc_volume_set(i2s.i2s_stream_writer, i2s.volume - 5)) {
+    if (i2s.volume <= -30) {
+        return 0;
+    }
+    int volume_new = i2s.volume - 5;
+    if (volume_set(volume_new) != 0) {
         return -1;
     }
-    i2s.volume -= 5;
-    ESP_LOGI(TAG, "Volume=%d", i2s.volume);
     return 0;
 }
 
 int i2s_channel_next(void)
 {
-    int channel_next = 0;
-    const char *uri_next = NULL;
-
-    // current channel = preset_last  = next is custom
-    if (i2s.channel == stream_uri_preset_sz - 1) {
-        channel_next = i2s.channel + 1;
-        uri_next = stream_uri_custom;
-    // current channel = last = custom
-    } else if (i2s.channel == stream_uri_preset_sz) {
-        channel_next = 0;
-        uri_next = stream_uri_preset[channel_next];
+    int channel_new = 0;
+    if (i2s.channel == stream_uri_preset_sz) {
+        channel_new = 0;
     } else {
-        channel_next = i2s.channel + 1;
-        uri_next = stream_uri_preset[channel_next];
+        channel_new = i2s.channel + 1;
     }
 
-    if (audio_element_set_uri(i2s.http_stream_reader, uri_next)) {
+    if (channel_set(channel_new) != 0) {
         return -1;
     }
-    i2s_stream_restart();
-    i2s.channel = channel_next;
-    ESP_LOGI(TAG, "Channel=%d", i2s.channel);
     return 0;
 }
 
 int i2s_channel_prev(void)
 {
-    int channel_prev = 0;
-    const char *uri_prev = NULL;
-
-    // current channel = 0 = prev is custom
+    int channel_new = 0;
     if (i2s.channel == 0) {
-        channel_prev = stream_uri_preset_sz;
-        uri_prev = stream_uri_custom;
-    // current channel = custom = prev is preset_last
-    } else if (i2s.channel == stream_uri_preset_sz) {
-        channel_prev = stream_uri_preset_sz - 1;
-        uri_prev = stream_uri_preset[channel_prev];
+        channel_new = stream_uri_preset_sz;
     } else {
-        channel_prev = i2s.channel - 1;
-        uri_prev = stream_uri_preset[channel_prev];
+        channel_new = i2s.channel - 1;
     }
 
-    if (audio_element_set_uri(i2s.http_stream_reader, uri_prev)) {
+    if (channel_set(channel_new) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
+static int channel_set(int channel)
+{
+    if (uri_set_by_channel(channel)) {
+        return -1;
+    }
+    if (storas_set_int("channel", channel)) {
         return -1;
     }
     i2s_stream_restart();
-    i2s.channel = channel_prev;
+    i2s.channel = channel;
     ESP_LOGI(TAG, "Channel=%d", i2s.channel);
+    return 0;
+}
+
+static int volume_set(int volume)
+{
+    if (i2s_alc_volume_set(i2s.i2s_stream_writer, volume) != ESP_OK) {
+        return -1;
+    }
+    if (storas_set_int("volume", volume) != 0) {
+        return -1;
+    }
+    i2s.volume = volume;
+    ESP_LOGI(TAG, "Volume=%d", i2s.volume);
+    return 0;
+}
+
+static int uri_set_by_channel(int channel)
+{
+    if (channel == stream_uri_preset_sz) {
+        if (audio_element_set_uri(i2s.http_stream_reader, stream_uri_custom) != ESP_OK) {
+            return -1;
+        }
+    } else {
+        if (audio_element_set_uri(i2s.http_stream_reader, stream_uri_preset[channel]) != ESP_OK) {
+            return -1;
+        }
+    }
+
     return 0;
 }
 

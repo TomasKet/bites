@@ -102,29 +102,29 @@ static void gpio_task(void *)
         }
 
 		if (!btn[0].is_pressed && !btn[1].is_pressed) {
-            if (btn[0].time_pressed > TIMEOUT_DEFAULTS && btn[1].time_pressed > TIMEOUT_DEFAULTS) {
+            if (btn[0].time_pressed >= TIMEOUT_DEFAULTS && btn[1].time_pressed >= TIMEOUT_DEFAULTS) {
                 if (restore_defaults()) {
     				ESP_LOGI(TAG, "restore defaults failed");
                 } else {
                     ESP_LOGI(TAG, "restore defaults");
                     esp_restart();
                 }
-            } else if (btn[0].time_pressed > TIMEOUT_RESET && btn[1].time_pressed > TIMEOUT_RESET) {
+            } else if (btn[0].time_pressed >= TIMEOUT_RESET && btn[1].time_pressed >= TIMEOUT_RESET) {
 				ESP_LOGI(TAG, "reset");
                 esp_restart();
-            } else if (btn[0].time_pressed > TIMEOUT_CH_SWITCH || btn[1].time_pressed > TIMEOUT_CH_SWITCH) {
-                if (btn[0].time_pressed > TIMEOUT_CH_SWITCH) {
+            } else if (btn[0].time_pressed >= TIMEOUT_CH_SWITCH || btn[1].time_pressed >= TIMEOUT_CH_SWITCH) {
+                if (btn[0].time_pressed >= TIMEOUT_CH_SWITCH) {
                     ESP_LOGI(TAG, "ch++");
                     i2s_channel_next();
-                } else if (btn[1].time_pressed > TIMEOUT_CH_SWITCH) {
+                } else if (btn[1].time_pressed >= TIMEOUT_CH_SWITCH) {
                     ESP_LOGI(TAG, "ch--");
                     i2s_channel_prev();
                 }
-            } else if (btn[0].time_pressed > 0 || btn[1].time_pressed > 0) {
-                if (btn[0].time_pressed > 0) {
+            } else if (btn[0].time_pressed >= GPIO_TASK_DELAY || btn[1].time_pressed >= GPIO_TASK_DELAY) {
+                if (btn[0].time_pressed >= GPIO_TASK_DELAY) {
                     ESP_LOGI(TAG, "vol++");
                     i2s_volume_up();
-                } else if (btn[1].time_pressed > 0) {
+                } else if (btn[1].time_pressed >= GPIO_TASK_DELAY) {
                     ESP_LOGI(TAG, "vol--");
                     i2s_volume_down();
                 }

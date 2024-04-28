@@ -11,7 +11,7 @@ struct i2s_stream_handle_t {
     audio_pipeline_handle_t pipeline;
 };
 
-void i2s_stream_start(void);
+int i2s_stream_start(void);
 int i2s_volume_up(void);
 int i2s_volume_down(void);
 int i2s_channel_next(void);
